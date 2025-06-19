@@ -6,11 +6,11 @@
 
 #include "DisplayFonts.h"
 
-#define TFT_SCK      2
-#define TFT_MOSI     3
-#define TFT_CS       5
-#define TFT_DC       4
-#define TFT_RST      6
+#define TFT_SCK      20
+#define TFT_MOSI     19
+#define TFT_DC       18
+#define TFT_CS       15
+#define TFT_RST      14
 #define TFT_HOR_RES  240
 #define TFT_VER_RES  240
 #define TFT_ROTATION LV_DISPLAY_ROTATION_0
