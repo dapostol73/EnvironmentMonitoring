@@ -3,16 +3,17 @@
 
 #include <Arduino_GFX_Library.h>
 #include <lvgl.h>
-#include <gfxfont.h>
 
-#define TFT_CS 15 // GFX_NOT_DEFINED for display without CS pin
-#define TFT_DC 4
-#define TFT_RST 2
-#define TFT_SCK 14
-#define TFT_MOSI 18
-#define TFT_HOR_RES   240
-#define TFT_VER_RES   240
-#define TFT_ROTATION  LV_DISPLAY_ROTATION_0
+#include "DisplayFonts.h"
+
+#define TFT_SCK      2
+#define TFT_MOSI     3
+#define TFT_CS       5
+#define TFT_DC       4
+#define TFT_RST      6
+#define TFT_HOR_RES  240
+#define TFT_VER_RES  240
+#define TFT_ROTATION LV_DISPLAY_ROTATION_0
 
 /*LVGL draw into this buffer, 1/10 screen size usually works well. The size is in bytes*/
 #define DRAW_BUF_SIZE (TFT_HOR_RES * TFT_VER_RES / 10 * (LV_COLOR_DEPTH / 8))
@@ -24,22 +25,35 @@ class DisplayControl
 {
 	private:
         uint32_t m_drawBuffer[DRAW_BUF_SIZE / 4];
-		uint8_t m_currentLine = 0;
-		uint8_t m_lineHeight  = 10;
-		uint8_t m_maxLines    = 0;
+		uint32_t m_updateFreq = 250;
+		uint32_t m_screenWidth;
+		uint32_t m_screenHeight;
+		lv_obj_t *m_screen;
+		lv_obj_t *m_gaugeVOC;
+		lv_obj_t *m_labelVOC;
+		lv_obj_t *m_gaugeHumidity;
+		lv_obj_t *m_labelHumidity;
+		lv_color_t m_colorBlack = LV_COLOR_MAKE(0, 0, 0);
+		lv_color_t m_colorGray = LV_COLOR_MAKE(128, 128, 128);
+		lv_color_t m_colorWhite = LV_COLOR_MAKE(235, 235, 235);
+		lv_color_t m_colorAmber = LV_COLOR_MAKE(250, 140, 0);
+		lv_color_t m_colorAqua = LV_COLOR_MAKE(0, 64, 255);
 
-        void setMaxLines();
-    
+		void setupLvglDisplay();
+		void setupLvglTouch();
+		void setupLvglScreen();
+		lv_obj_t* setupLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color);
+		void createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color);
+		void createLvglArcLines(uint16_t size, uint16_t width, float start, float radius, uint16_t lines, lv_color_t color);
+		
+		lv_obj_t* setupLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color);
     protected:
-		const GFXfont *m_gfxFont;
-		const GFXfont *m_gfxFontDefault;
-		const GFXfont *m_gfxFontTemp;
 
     public:
         DisplayControl();
-        void init(uint16_t rotation, const GFXfont *gfxFont);
-		void setFont(const GFXfont *font);
-
+        void init(uint16_t rotation);
+		void updateVOC(float value);
+		void updateHumidity(float value);
 };
 
 #endif
