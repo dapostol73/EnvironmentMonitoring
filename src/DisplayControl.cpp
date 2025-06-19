@@ -61,19 +61,20 @@ void DisplayControl::init(uint16_t rotation)
     m_labelHumidity = setupLvglLabel(0, 16, "Hum: NA", m_colorAqua);
 }
 
-void DisplayControl::updateVOC(float value)
+void DisplayControl::updateVOC(uint16_t value)
 {
+    float percentage = map(value, 0, 5500, 0, 100);
     lv_anim_t a;
     lv_anim_init(&a);
     lv_anim_set_var(&a, m_gaugeVOC);
-    lv_anim_set_values(&a, lv_arc_get_value(m_gaugeVOC), value);
+    lv_anim_set_values(&a, lv_arc_get_value(m_gaugeVOC), percentage);
     lv_anim_set_time(&a, m_updateFreq);
     lv_anim_set_exec_cb(&a, ArcCallback);
     lv_anim_set_path_cb(&a, lv_anim_path_linear);
     lv_anim_start(&a);
 
     char text[20];
-    snprintf(text, sizeof(text), "VOC: %.1f", value);
+    snprintf(text, sizeof(text), "VOC: %d", value);
     lv_label_set_text(m_labelVOC, text);
 }
 

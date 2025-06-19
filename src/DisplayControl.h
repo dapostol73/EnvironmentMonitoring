@@ -52,7 +52,7 @@ class DisplayControl
     public:
         DisplayControl();
         void init(uint16_t rotation);
-		void updateVOC(float value);
+		void updateVOC(uint16_t value);
 		void updateHumidity(float value);
 };
 
