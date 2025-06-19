@@ -3,12 +3,14 @@
 
 #include <Arduino.h>
 #include <Adafruit_SGP30.h>
+#include <Adafruit_SHT31.h>
 #include "SensorData.h"
 
 class SensorControl
 {
 	private:
-        Adafruit_SGP30 m_sensor;
+        Adafruit_SGP30 m_sgpSensor;
+        Adafruit_SHT31 m_shtSensor = Adafruit_SHT31(&Wire1);
         uint32_t m_counter;
 
     protected:

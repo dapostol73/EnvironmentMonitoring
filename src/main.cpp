@@ -13,11 +13,16 @@ SensorData sensorData;
 void setup()
 {
     Serial.begin(115200);
+    delay(500);
     while (!Serial) { delay(10); } // Wait for serial console to open!
+    Serial.println("Environment Monitoring Init");
     // put your setup code here, to run once:
     pinMode(BUILTIN_LED, OUTPUT);
+    Serial.println("Display Control Init");
     displayControl.init(0);
+    Serial.println("Sensor Control Init");    
     sensorControl.init();
+    Serial.println("Init Complete"); 
 }
 
 void loop()
