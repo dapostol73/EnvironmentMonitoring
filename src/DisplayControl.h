@@ -30,6 +30,11 @@ class DisplayControl
 		uint32_t m_screenWidth;
 		uint32_t m_screenHeight;
 		uint32_t m_arcWidth = 14;
+		uint32_t m_arcMargin = 2;
+		float m_start = 140.0;
+    	float m_radius = 260.0;
+		float m_end = m_start+m_radius;
+		bool m_round = true;
 		lv_obj_t *m_screen;
 		lv_obj_t *m_gaugeVOC;
 		lv_obj_t *m_labelVOC;
@@ -40,6 +45,7 @@ class DisplayControl
 		lv_obj_t *m_gaugeTemperature;
 		lv_obj_t *m_labelTemperature;
 		lv_color_t m_colorBlack = LV_COLOR_MAKE(0, 0, 0);
+		lv_color_t m_colorGrayExtraDark = LV_COLOR_MAKE(24, 24, 24);
 		lv_color_t m_colorGrayDark = LV_COLOR_MAKE(48, 48, 48);
 		lv_color_t m_colorGrayMed = LV_COLOR_MAKE(128, 128, 128);
 		lv_color_t m_colorGrayLight = LV_COLOR_MAKE(194, 194, 194);

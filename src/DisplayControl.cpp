@@ -57,10 +57,10 @@ void DisplayControl::init(uint16_t rotation)
     setupLvglScreen();
     //m_gaugeVOC = setupLvglGauge(m_screenWidth, 24, 0, 100, m_colorAmber);
     //m_gaugeHumidity = setupLvglGauge(m_screenWidth-48, 24, 0, 100, m_colorAqua);
-    m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorBlack);
-    m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-(2*m_arcWidth), m_arcWidth, 0, 5500, m_colorAmber, m_colorGrayDark);
-    m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-(4*m_arcWidth), m_arcWidth, 0, 100, m_colorRed, m_colorBlack);
-    m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-(6*m_arcWidth), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
+    m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorGrayExtraDark);
+    m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-2*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 5500, m_colorAmber, m_colorGrayDark);
+    m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-4*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 100, m_colorRed, m_colorGrayExtraDark);
+    m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-6*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
     m_labelCO2 = createLvglLabel(0, 96, "NA CO2", m_colorYellow);
     m_labelVOC = createLvglLabel(0, 72, "NA VOC", m_colorAmber);
     m_labelTemperature = createLvglLabel(0, 48, "NA C", m_colorLime);
@@ -161,26 +161,23 @@ lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_
     lv_obj_t *mainArc = lv_arc_create(m_screen);
     uint16_t outsideWidth = width*0.75;
     uint16_t outsideSize = size-(width-outsideWidth);
-    float start = 135.0;
-    float radius = 270.0;
-    float end = start+radius;
     lv_obj_set_size(mainArc, outsideSize, outsideSize);
     lv_obj_align(mainArc, LV_ALIGN_CENTER, 0, 0);
-    lv_arc_set_bg_angles(mainArc, start, end);
+    lv_arc_set_bg_angles(mainArc, m_start, m_end);
 
     lv_obj_set_style_arc_color(mainArc, m_colorBlack, LV_PART_MAIN);
     lv_obj_set_style_arc_color(mainArc, color, LV_PART_INDICATOR);
-    lv_obj_set_style_arc_rounded(mainArc, false, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_rounded(mainArc, m_round, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(mainArc, outsideWidth, LV_PART_INDICATOR);
     lv_obj_remove_style(mainArc, NULL, LV_PART_KNOB);
     lv_arc_set_range(mainArc, minValue, maxValue);
 
-    createLvglArcLines(size-width, width*0.5, start, radius, 20, m_colorGrayMed);
-    createLvglArcLines(size, width, start, radius, 5, m_colorWhite);
+    createLvglArcLines(size-width, width*0.5, m_start, m_radius, 20, m_colorGrayMed);
+    createLvglArcLines(size, width, m_start, m_radius, 5, m_colorWhite);
 
     uint16_t insideWidth = 4;
     uint16_t insideSize = size-(2*width)+(2*insideWidth);
-    createLvglArcSimple(insideSize, insideWidth, start, radius, m_colorWhite);
+    createLvglArcSimple(insideSize, insideWidth, m_start, m_radius, m_colorWhite);
 
     return mainArc;
 }
@@ -188,16 +185,13 @@ lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_
 lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t fgColor, lv_color_t bgColor)
 {
     lv_obj_t *simpleArc = lv_arc_create(m_screen);
-    float start = 135.0;
-    float radius = 270.0;
-    float end = start+radius;
     lv_obj_set_size(simpleArc, size, size);
     lv_obj_align(simpleArc, LV_ALIGN_CENTER, 0, 0);
-    lv_arc_set_bg_angles(simpleArc, start, end);
+    lv_arc_set_bg_angles(simpleArc, m_start, m_end);
     lv_obj_set_style_arc_color(simpleArc, bgColor, LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(simpleArc, false, LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(simpleArc, m_round, LV_PART_MAIN);
     lv_obj_set_style_arc_color(simpleArc, fgColor, LV_PART_INDICATOR);
-    lv_obj_set_style_arc_rounded(simpleArc, false, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_rounded(simpleArc, m_round, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(simpleArc, width, LV_PART_INDICATOR);
     lv_obj_remove_style(simpleArc, NULL, LV_PART_KNOB);
     lv_arc_set_range(simpleArc, minValue, maxValue);
@@ -213,7 +207,7 @@ void DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float st
     lv_arc_set_bg_angles(lineArc, start, start+radius);
 
     lv_obj_set_style_arc_color(lineArc, color, LV_PART_MAIN);
-    lv_obj_set_style_arc_rounded(lineArc, false, LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(lineArc, m_round, LV_PART_MAIN);
     lv_obj_set_style_arc_width(lineArc, width, LV_PART_MAIN);
     lv_obj_remove_style(lineArc, NULL, LV_PART_INDICATOR);
     lv_obj_remove_style(lineArc, NULL, LV_PART_KNOB);

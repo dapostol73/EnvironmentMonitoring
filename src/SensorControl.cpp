@@ -27,7 +27,7 @@ void SensorControl::init()
     Serial.println(m_sgpSensor.serialnumber[2], HEX);
 
     // If you have a baseline measurement from before you can assign it to start, to 'self-calibrate'
-    m_sgpSensor.setIAQBaseline(0x8DDF, 0x8C9D);  // Will vary for each sensor!
+    //m_sgpSensor.setIAQBaseline(0x8DDF, 0x8C9D);  // Will vary for each sensor!
     //****Baseline values: eCO2: 0x8BBB & TVOC: 0x8C14
     //****Baseline values: eCO2: 0x8D52 & TVOC: 0x8C5C
     //****Baseline values: eCO2: 0x8DC6 & TVOC: 0x8C61
@@ -54,8 +54,8 @@ void SensorControl::readSensorData(SensorData* sensorData)
 {
     sensorData->IsUpdated = false;
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
-    sensorData->Temp = m_shtSensor.readTemperature(); // [°C]
-    sensorData->Hmd = m_shtSensor.readHumidity(); // [%RH]
+    sensorData->Temp = m_shtSensor.readTemperature()+m_offsetTemp; // [°C]
+    sensorData->Hmd = m_shtSensor.readHumidity()+m_offsetHum; // [%RH]
     m_sgpSensor.setHumidity(getAbsoluteHumidity(sensorData->Temp, sensorData->Hmd));
 
     if (!m_sgpSensor.IAQmeasure())
@@ -63,22 +63,27 @@ void SensorControl::readSensorData(SensorData* sensorData)
         Serial.println("Measurement failed");
         return;
     }
-
-    sensorData->TVOC = m_sgpSensor.TVOC;
-    sensorData->eCO2 = m_sgpSensor.eCO2;
+    else
+    {
+        sensorData->TVOC = m_sgpSensor.TVOC;
+        sensorData->eCO2 = m_sgpSensor.eCO2;
+    }
     
     if (!m_sgpSensor.IAQmeasureRaw())
     {
         Serial.println("Raw Measurement failed");
         return;
     }
+    else
+    {
+        sensorData->rawH2 = m_sgpSensor.rawH2;
+        sensorData->rawEthanol = m_sgpSensor.rawEthanol;
+    }
 
-    sensorData->rawH2 = m_sgpSensor.rawH2;
-    sensorData->rawEthanol = m_sgpSensor.rawEthanol;
     sensorData->IsUpdated = true;
 }
 
-void SensorControl::printSensorDataStats()
+void SensorControl::printSensorStats(bool all)
 {
     if (!m_sgpSensor.IAQmeasure())
     {
@@ -86,8 +91,11 @@ void SensorControl::printSensorDataStats()
         return;
     }
 
-    Serial.print("TVOC "); Serial.print(m_sgpSensor.TVOC); Serial.print(" ppb\t");
-    Serial.print("eCO2 "); Serial.print(m_sgpSensor.eCO2); Serial.println(" ppm");
+    if (all)
+    {
+        Serial.print("TVOC "); Serial.print(m_sgpSensor.TVOC); Serial.print(" ppb\t");
+        Serial.print("eCO2 "); Serial.print(m_sgpSensor.eCO2); Serial.println(" ppm");
+    }
 
     if (!m_sgpSensor.IAQmeasureRaw())
     {
@@ -95,14 +103,19 @@ void SensorControl::printSensorDataStats()
         return;
     }
   
-    Serial.print("Raw H2 "); Serial.print(m_sgpSensor.rawH2); Serial.print(" \t");
-    Serial.print("Raw Ethanol "); Serial.print(m_sgpSensor.rawEthanol); Serial.println("");
+    if (all)
+    {
+        Serial.print("Raw H2 "); Serial.print(m_sgpSensor.rawH2); Serial.print(" \t");
+        Serial.print("Raw Ethanol "); Serial.print(m_sgpSensor.rawEthanol); Serial.println("");
+    }    
 
     delay(1000);
 
     m_counter++;
+    Serial.print(".");
     if (m_counter == 30)
     {
+        Serial.println();
         m_counter = 0;
 
         uint16_t TVOC_base, eCO2_base;
