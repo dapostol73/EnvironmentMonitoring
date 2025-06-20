@@ -11,7 +11,7 @@ void SensorControl::init()
 
     if (!m_shtSensor.begin())
     {
-        Serial.println("SHT30 Sensor not found :(");
+        Serial.println("SHT3X-DIS Sensor not found :(");
         while (1);
     }
 
@@ -52,6 +52,7 @@ uint32_t SensorControl::getAbsoluteHumidity(float temperature, float humidity)
 
 void SensorControl::readSensorData(SensorData* sensorData)
 {
+    sensorData->IsUpdated = false;
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
     sensorData->Temp = m_shtSensor.readTemperature(); // [°C]
     sensorData->Hmd = m_shtSensor.readHumidity(); // [%RH]

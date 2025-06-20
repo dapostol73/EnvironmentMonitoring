@@ -55,43 +55,69 @@ void DisplayControl::init(uint16_t rotation)
     setupLvglDisplay();
     setupLvglTouch();
     setupLvglScreen();
-    m_gaugeVOC = setupLvglGauge(m_screenWidth, 24, 0, 100, m_colorAmber);
-    m_gaugeHumidity = setupLvglGauge(m_screenWidth-48, 24, 0, 100, m_colorAqua);
-    m_labelVOC = setupLvglLabel(0, -16, "VOC: NA", m_colorAmber);
-    m_labelHumidity = setupLvglLabel(0, 16, "Hum: NA", m_colorAqua);
+    //m_gaugeVOC = setupLvglGauge(m_screenWidth, 24, 0, 100, m_colorAmber);
+    //m_gaugeHumidity = setupLvglGauge(m_screenWidth-48, 24, 0, 100, m_colorAqua);
+    m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorBlack);
+    m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-(2*m_arcWidth), m_arcWidth, 0, 5500, m_colorAmber, m_colorGrayDark);
+    m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-(4*m_arcWidth), m_arcWidth, 0, 100, m_colorRed, m_colorBlack);
+    m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-(6*m_arcWidth), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
+    m_labelCO2 = createLvglLabel(0, 96, "NA CO2", m_colorYellow);
+    m_labelVOC = createLvglLabel(0, 72, "NA VOC", m_colorAmber);
+    m_labelTemperature = createLvglLabel(0, 48, "NA C", m_colorLime);
+    m_labelHumidity = createLvglLabel(0, 24, "NA RH", m_colorAqua);
+}
+
+void DisplayControl::update(SensorData * sensorData)
+{
+    updateVOC(sensorData->TVOC);
+    updateCO2(sensorData->eCO2);
+    updateHumidity(sensorData->Hmd);
+    updateTemperature(sensorData->Temp);
 }
 
 void DisplayControl::updateVOC(uint16_t value)
 {
-    float percentage = map(value, 0, 5500, 0, 100);
-    lv_anim_t a;
-    lv_anim_init(&a);
-    lv_anim_set_var(&a, m_gaugeVOC);
-    lv_anim_set_values(&a, lv_arc_get_value(m_gaugeVOC), percentage);
-    lv_anim_set_time(&a, m_updateFreq);
-    lv_anim_set_exec_cb(&a, ArcCallback);
-    lv_anim_set_path_cb(&a, lv_anim_path_linear);
-    lv_anim_start(&a);
-
     char text[20];
-    snprintf(text, sizeof(text), "VOC: %d", value);
+    snprintf(text, sizeof(text), "%d VOC", value);
     lv_label_set_text(m_labelVOC, text);
+    animateArc(m_gaugeVOC, max((int)value, 100));
+}
+
+
+void DisplayControl::updateCO2(uint16_t value)
+{
+    char text[20];
+    snprintf(text, sizeof(text), "%d CO2", value);
+    lv_label_set_text(m_labelCO2, text);
+    animateArc(m_gaugeCO2, max((int)value, 100));
 }
 
 void DisplayControl::updateHumidity(float value)
 {
+    char text[20];
+    snprintf(text, sizeof(text), "%.1f RH", value);
+    lv_label_set_text(m_labelHumidity, text);
+    animateArc(m_gaugeHumidity, max(value, 1.0f));
+}
+
+void DisplayControl::updateTemperature(float value)
+{
+    char text[20];
+    snprintf(text, sizeof(text), "%.1f C", value);
+    lv_label_set_text(m_labelTemperature, text);
+    animateArc(m_gaugeTemperature, max(value, 1.0f));
+}
+
+void DisplayControl::animateArc(lv_obj_t * lv_arc, uint32_t value)
+{
     lv_anim_t a;
     lv_anim_init(&a);
-    lv_anim_set_var(&a, m_gaugeHumidity);
-    lv_anim_set_values(&a, lv_arc_get_value(m_gaugeHumidity), value);
+    lv_anim_set_var(&a, lv_arc);
+    lv_anim_set_values(&a, lv_arc_get_value(lv_arc), value);
     lv_anim_set_time(&a, m_updateFreq);
     lv_anim_set_exec_cb(&a, ArcCallback);
     lv_anim_set_path_cb(&a, lv_anim_path_linear);
     lv_anim_start(&a);
-
-    char text[20];
-    snprintf(text, sizeof(text), "Hum: %.1f", value);
-    lv_label_set_text(m_labelHumidity, text);
 }
 
 void DisplayControl::setupLvglDisplay()
@@ -118,7 +144,19 @@ void DisplayControl::setupLvglScreen()
     lv_obj_set_style_bg_color(m_screen, m_colorBlack, 0);
 }
 
-lv_obj_t* DisplayControl::setupLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color)
+
+lv_obj_t* DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color)
+{
+    lv_obj_t *label = lv_label_create(m_screen);
+    lv_label_set_text(label, text);
+    lv_obj_set_style_text_color(label, color, LV_PART_MAIN);
+    lv_obj_set_style_text_font(label, &CalibriBold28pt7b, LV_PART_MAIN);
+    lv_obj_align(label, LV_ALIGN_CENTER, x, y);
+
+    return label;
+}
+
+lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color)
 {
     lv_obj_t *mainArc = lv_arc_create(m_screen);
     uint16_t outsideWidth = width*0.75;
@@ -135,11 +173,9 @@ lv_obj_t* DisplayControl::setupLvglGauge(uint16_t size, uint16_t width, uint16_t
     lv_obj_set_style_arc_rounded(mainArc, false, LV_PART_INDICATOR);
     lv_obj_set_style_arc_width(mainArc, outsideWidth, LV_PART_INDICATOR);
     lv_obj_remove_style(mainArc, NULL, LV_PART_KNOB);
-
     lv_arc_set_range(mainArc, minValue, maxValue);
-    lv_arc_set_value(mainArc, maxValue*0.3);
 
-    createLvglArcLines(size-width, width*0.5, start, radius, 20, m_colorGray);
+    createLvglArcLines(size-width, width*0.5, start, radius, 20, m_colorGrayMed);
     createLvglArcLines(size, width, start, radius, 5, m_colorWhite);
 
     uint16_t insideWidth = 4;
@@ -147,6 +183,26 @@ lv_obj_t* DisplayControl::setupLvglGauge(uint16_t size, uint16_t width, uint16_t
     createLvglArcSimple(insideSize, insideWidth, start, radius, m_colorWhite);
 
     return mainArc;
+}
+
+lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t fgColor, lv_color_t bgColor)
+{
+    lv_obj_t *simpleArc = lv_arc_create(m_screen);
+    float start = 135.0;
+    float radius = 270.0;
+    float end = start+radius;
+    lv_obj_set_size(simpleArc, size, size);
+    lv_obj_align(simpleArc, LV_ALIGN_CENTER, 0, 0);
+    lv_arc_set_bg_angles(simpleArc, start, end);
+    lv_obj_set_style_arc_color(simpleArc, bgColor, LV_PART_MAIN);
+    lv_obj_set_style_arc_rounded(simpleArc, false, LV_PART_MAIN);
+    lv_obj_set_style_arc_color(simpleArc, fgColor, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_rounded(simpleArc, false, LV_PART_INDICATOR);
+    lv_obj_set_style_arc_width(simpleArc, width, LV_PART_INDICATOR);
+    lv_obj_remove_style(simpleArc, NULL, LV_PART_KNOB);
+    lv_arc_set_range(simpleArc, minValue, maxValue);
+
+    return simpleArc;
 }
 
 void DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color)
@@ -182,13 +238,4 @@ void DisplayControl::createLvglArcLines(uint16_t size, uint16_t width, float sta
     }    
 }
 
-lv_obj_t* DisplayControl::setupLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color)
-{
-    lv_obj_t *label = lv_label_create(m_screen);
-    lv_label_set_text(label, text);
-    lv_obj_set_style_text_color(label, color, LV_PART_MAIN);
-    lv_obj_set_style_text_font(label, &CalibriBold28pt7b, LV_PART_MAIN);
-    lv_obj_align(label, LV_ALIGN_CENTER, x, y);
 
-    return label;
-}
