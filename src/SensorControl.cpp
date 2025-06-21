@@ -1,5 +1,5 @@
 #include "SensorControl.h"
-
+//#define BASELINE_TESTING
 
 SensorControl::SensorControl()
 {
@@ -27,18 +27,13 @@ void SensorControl::init()
     Serial.println(m_sgpSensor.serialnumber[2], HEX);
 
     // If you have a baseline measurement from before you can assign it to start, to 'self-calibrate'
-    //m_sgpSensor.setIAQBaseline(0x8DDF, 0x8C9D);  // Will vary for each sensor!
-    //****Baseline values: eCO2: 0x8BBB & TVOC: 0x8C14
-    //****Baseline values: eCO2: 0x8D52 & TVOC: 0x8C5C
-    //****Baseline values: eCO2: 0x8DC6 & TVOC: 0x8C61
-    //****Baseline values: eCO2: 0x8DD4 & TVOC: 0x8C81
-    //****Baseline values: eCO2: 0x8DDF & TVOC: 0x8C8D
-    //****Baseline values: eCO2: 0x8DE9 & TVOC: 0x8C92
-    //****Baseline values: eCO2: 0x8DDA & TVOC: 0x8C9D
-    //****Baseline values: eCO2: 0x8DD3 & TVOC: 0x8CB9
-    //****Baseline values: eCO2: 0x8DCB & TVOC: 0x8D09
-    //****Baseline values: eCO2: 0x8DBD & TVOC: 0x8D06
-    //****Baseline values: eCO2: 0x8DAE & TVOC: 0x8D03
+    #ifndef BASELINE_TESTING
+        m_sgpSensor.setIAQBaseline(0x9021, 0x94E7);  // Will vary for each sensor!
+    #endif
+    //****Baseline values: eCO2: 0x8DCE & TVOC: 0x9026
+    //****Baseline values: eCO2: 0x8C2A & TVOC: 0x8FAD
+    //****Baseline values: eCO2: 0x9200 & TVOC: 0x9583
+    //****Baseline values: eCO2: 0x9021 & TVOC: 0x94E7
 }
 
 
@@ -109,22 +104,23 @@ void SensorControl::printSensorStats(bool all)
         Serial.print("Raw Ethanol "); Serial.print(m_sgpSensor.rawEthanol); Serial.println("");
     }    
 
-    delay(1000);
-
-    m_counter++;
-    Serial.print(".");
-    if (m_counter == 30)
-    {
-        Serial.println();
-        m_counter = 0;
-
-        uint16_t TVOC_base, eCO2_base;
-        if (!m_sgpSensor.getIAQBaseline(&eCO2_base, &TVOC_base)) 
+    #ifdef BASELINE_TESTING
+        delay(1000);
+        m_counter++;
+        Serial.print(".");
+        if (m_counter == 30)
         {
-            Serial.println("Failed to get baseline readings");
-            return;
+            Serial.println();
+            m_counter = 0;
+
+            uint16_t TVOC_base, eCO2_base;
+            if (!m_sgpSensor.getIAQBaseline(&eCO2_base, &TVOC_base)) 
+            {
+                Serial.println("Failed to get baseline readings");
+                return;
+            }
+            Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
+            Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
         }
-        Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
-        Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
-    }    
+    #endif 
 }
