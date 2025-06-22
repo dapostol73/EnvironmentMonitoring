@@ -6,6 +6,9 @@
 #include "SensorControl.h"
 #include "SensorData.h"
 
+long timeSinceLastRead = LONG_MIN;
+const uint16_t SENSOR_INTERVAL_SECS = 5; // Sensor query every 5 seconds
+
 DisplayControl displayControl;
 SensorControl sensorControl;
 SensorData sensorData;
@@ -27,11 +30,17 @@ void setup()
 
 void loop()
 {
-    sensorControl.readSensorData(&sensorData);
-    digitalWrite (BUILTIN_LED, HIGH);	// turn on the LED
-    delay(500);	// wait for half a second or 500 milliseconds
-    digitalWrite (BUILTIN_LED, LOW);	// turn off the LED
-    delay(500);	// wait for half a second or 500 milliseconds
+    if (millis() - timeSinceLastRead > (1000L*SENSOR_INTERVAL_SECS))
+	{
+		Serial.println("Updating sensor data");
+        sensorControl.readSensorData(&sensorData);
+		timeSinceLastRead = millis();
+        digitalWrite (BUILTIN_LED, HIGH);	// turn on the LED
+        delay(500);	// wait for half a second or 500 milliseconds
+        digitalWrite (BUILTIN_LED, LOW);	// turn off the LED
+        delay(500);	// wait for half a second or 500 milliseconds
+	}
+
     if (sensorData.IsUpdated)
     {
         displayControl.update(&sensorData);
