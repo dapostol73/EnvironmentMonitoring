@@ -5,6 +5,7 @@
 #include <lvgl.h>
 
 #include "DisplayFonts.h"
+#include "DisplayImages.h"
 #include "SensorData.h"
 
 #define TFT_SCK      20
@@ -35,7 +36,8 @@ class DisplayControl
     	float m_radius = 260.0;
 		float m_end = m_start+m_radius;
 		bool m_round = true;
-		lv_obj_t *m_screen;
+		lv_obj_t *m_screenBoot;
+		lv_obj_t *m_screenMain;
 		lv_obj_t *m_gaugeVOC;
 		lv_obj_t *m_labelVOC;
 		lv_obj_t *m_gaugeCO2;

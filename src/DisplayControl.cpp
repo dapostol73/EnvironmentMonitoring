@@ -65,7 +65,9 @@ void DisplayControl::init(uint16_t rotation)
     m_labelVOC = createLvglLabel(0, 72, "NA VOC", m_colorAmber);
     m_labelTemperature = createLvglLabel(0, 48, "NA C", m_colorRed);
     m_labelHumidity = createLvglLabel(0, 24, "NA RH", m_colorAqua);
+    lv_scr_load(m_screenBoot);
     lv_timer_handler();
+    lv_scr_load(m_screenMain);
 }
 
 void DisplayControl::update(SensorData * sensorData)
@@ -141,14 +143,19 @@ void DisplayControl::setupLvglTouch()
 
 void DisplayControl::setupLvglScreen()
 {
-    m_screen = lv_scr_act();
-    lv_obj_set_style_bg_color(m_screen, m_colorBlack, 0);
+    m_screenBoot = lv_obj_create(NULL);
+    m_screenMain = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color(m_screenBoot, m_colorBlack, 0);
+    lv_obj_t *img1 = lv_image_create(m_screenBoot);
+    lv_image_set_src(img1, &a12_logo_horizantal_256x128_blue);
+    lv_obj_align(img1, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(m_screenMain, m_colorBlack, 0);
 }
 
 
 lv_obj_t* DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color)
 {
-    lv_obj_t *label = lv_label_create(m_screen);
+    lv_obj_t *label = lv_label_create(m_screenMain);
     lv_label_set_text(label, text);
     lv_obj_set_style_text_color(label, color, LV_PART_MAIN);
     lv_obj_set_style_text_font(label, &CalibriBold28pt7b, LV_PART_MAIN);
@@ -159,7 +166,7 @@ lv_obj_t* DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * tex
 
 lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color)
 {
-    lv_obj_t *mainArc = lv_arc_create(m_screen);
+    lv_obj_t *mainArc = lv_arc_create(m_screenMain);
     uint16_t outsideWidth = width*0.75;
     uint16_t outsideSize = size-(width-outsideWidth);
     lv_obj_set_size(mainArc, outsideSize, outsideSize);
@@ -185,7 +192,7 @@ lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_
 
 lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t fgColor, lv_color_t bgColor)
 {
-    lv_obj_t *simpleArc = lv_arc_create(m_screen);
+    lv_obj_t *simpleArc = lv_arc_create(m_screenMain);
     lv_obj_set_size(simpleArc, size, size);
     lv_obj_align(simpleArc, LV_ALIGN_CENTER, 0, 0);
     lv_arc_set_bg_angles(simpleArc, m_start, m_end);
@@ -202,7 +209,7 @@ lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, u
 
 void DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color)
 {
-    lv_obj_t *lineArc = lv_arc_create(m_screen);
+    lv_obj_t *lineArc = lv_arc_create(m_screenMain);
     lv_obj_set_size(lineArc, size, size);
     lv_obj_align(lineArc, LV_ALIGN_CENTER, 0, 0);
     lv_arc_set_bg_angles(lineArc, start, start+radius);
@@ -219,7 +226,7 @@ void DisplayControl::createLvglArcLines(uint16_t size, uint16_t width, float sta
     float segment = radius/lines;
     for (uint8_t i = 0; i <= lines; i++)
     {
-        lv_obj_t *lineArc = lv_arc_create(m_screen);
+        lv_obj_t *lineArc = lv_arc_create(m_screenMain);
         uint16_t lineStart = start+(segment*i);
         lv_obj_set_size(lineArc, size, size);
         lv_obj_align(lineArc, LV_ALIGN_CENTER, 0, 0);
