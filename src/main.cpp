@@ -7,7 +7,7 @@
 #include "SensorData.h"
 
 long timeSinceLastRead = LONG_MIN;
-const uint16_t SENSOR_INTERVAL_SECS = 5; // Sensor query every 5 seconds
+const uint16_t SENSOR_INTERVAL_SECS = 1; // Sensor query every 5 seconds
 
 DisplayControl displayControl;
 SensorControl sensorControl;
@@ -16,8 +16,9 @@ SensorData sensorData;
 void setup()
 {
     Serial.begin(115200);
-    delay(500);
+    delay(1000);
     while (!Serial) { delay(10); } // Wait for serial console to open!
+
     Serial.println("Environment Monitoring Init");
     // put your setup code here, to run once:
     pinMode(BUILTIN_LED, OUTPUT);
@@ -47,6 +48,6 @@ void loop()
         sensorData.IsUpdated = false;
     }
 
-    sensorControl.printSensorStats();
+    //sensorControl.printSensorStats();
     lv_timer_handler(); /* let the GUI do its work */
 }

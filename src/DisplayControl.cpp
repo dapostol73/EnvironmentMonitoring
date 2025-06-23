@@ -65,6 +65,7 @@ void DisplayControl::init(uint16_t rotation)
     m_labelVOC = createLvglLabel(0, 72, "NA VOC", m_colorAmber);
     m_labelTemperature = createLvglLabel(0, 48, "NA C", m_colorRed);
     m_labelHumidity = createLvglLabel(0, 24, "NA RH", m_colorAqua);
+    lv_timer_handler();
 }
 
 void DisplayControl::update(SensorData * sensorData)
