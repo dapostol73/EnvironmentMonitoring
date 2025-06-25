@@ -1,6 +1,5 @@
 
 #include <Arduino.h>
-#include <Adafruit_SGP30.h>
 
 #include "DisplayControl.h"
 #include "SensorControl.h"
