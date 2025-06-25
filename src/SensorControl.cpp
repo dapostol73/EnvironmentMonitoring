@@ -57,7 +57,7 @@ void SensorControl::readSensorData(SensorData* sensorData)
 
         if (m_ensSensor.measure())
         {
-            sensorData->AQI = m_ensSensor.getAQI500();
+            sensorData->AQI = m_ensSensor.getAQI();
             sensorData->TVOC = m_ensSensor.getTVOC();
             sensorData->eCO2 = m_ensSensor.geteCO2();
         }
