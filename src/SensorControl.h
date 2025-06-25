@@ -26,7 +26,7 @@ class SensorControl
         void init();
         uint32_t getAbsoluteHumidity(float temperature, float humidity);
         void readSensorData(SensorData* sensorData);
-        void printSensorStats(bool all = false);
+        void printSensorStats(SensorData* sensorData);
 };
 
 #endif

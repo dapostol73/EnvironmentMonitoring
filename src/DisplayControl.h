@@ -30,7 +30,7 @@ class DisplayControl
 		uint32_t m_updateFreq = 250;
 		uint32_t m_screenWidth;
 		uint32_t m_screenHeight;
-		uint32_t m_arcWidth = 14;
+		uint32_t m_arcWidth = 10;
 		uint32_t m_arcMargin = 2;
 		float m_start = 140.0;
     	float m_radius = 260.0;
@@ -38,6 +38,8 @@ class DisplayControl
 		bool m_round = true;
 		lv_obj_t *m_screenBoot;
 		lv_obj_t *m_screenMain;
+		lv_obj_t *m_gaugeAQI;
+		lv_obj_t *m_labelAQI;
 		lv_obj_t *m_gaugeVOC;
 		lv_obj_t *m_labelVOC;
 		lv_obj_t *m_gaugeCO2;
@@ -67,6 +69,7 @@ class DisplayControl
 		void createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color);
 		void createLvglArcLines(uint16_t size, uint16_t width, float start, float radius, uint16_t lines, lv_color_t color);
 		void animateArc(lv_obj_t * lv_arc, uint32_t value);
+		void updateAQI(uint16_t value);
 		void updateVOC(uint16_t value);
 		void updateCO2(uint16_t value);
 		void updateHumidity(float value);

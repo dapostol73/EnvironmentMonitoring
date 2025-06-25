@@ -45,9 +45,9 @@ void loop()
     if (sensorData.IsUpdated)
     {
         displayControl.update(&sensorData);
+        sensorControl.printSensorStats(&sensorData);
         sensorData.IsUpdated = false;
     }
-
-    //sensorControl.printSensorStats(true);
+    
     lv_timer_handler(); /* let the GUI do its work */
 }

@@ -57,14 +57,16 @@ void DisplayControl::init(uint16_t rotation)
     setupLvglScreen();
     //m_gaugeVOC = setupLvglGauge(m_screenWidth, 24, 0, 100, m_colorAmber);
     //m_gaugeHumidity = setupLvglGauge(m_screenWidth-48, 24, 0, 100, m_colorAqua);
-    m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorGrayExtraDark);
-    m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-2*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 5500, m_colorAmber, m_colorGrayDark);
-    m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-4*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 50, m_colorRed, m_colorGrayExtraDark);
-    m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-6*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
+    m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorGrayDark);
+    m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-2*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 5500, m_colorLime, m_colorGrayExtraDark);
+    m_gaugeAQI = createLvglGaugeSimple(m_screenWidth-4*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 500, m_colorAmber, m_colorGrayDark);
+    m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-6*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 50, m_colorRed, m_colorGrayExtraDark);
+    m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-8*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
     m_labelCO2 = createLvglLabel(0, 96, "NA CO2", m_colorYellow);
     m_labelVOC = createLvglLabel(0, 72, "NA VOC", m_colorAmber);
-    m_labelTemperature = createLvglLabel(0, 48, "NA C", m_colorRed);
-    m_labelHumidity = createLvglLabel(0, 24, "NA RH", m_colorAqua);
+    m_labelAQI = createLvglLabel(0, 48, "NA AQI", m_colorLime);
+    m_labelTemperature = createLvglLabel(0, 24, "NA C", m_colorRed);
+    m_labelHumidity = createLvglLabel(0, 0, "NA RH", m_colorAqua);
     lv_scr_load(m_screenBoot);
     lv_timer_handler();
     lv_scr_load(m_screenMain);
@@ -72,10 +74,19 @@ void DisplayControl::init(uint16_t rotation)
 
 void DisplayControl::update(SensorData * sensorData)
 {
+    updateAQI(sensorData->AQI);
     updateVOC(sensorData->TVOC);
     updateCO2(sensorData->eCO2);
     updateHumidity(sensorData->Hmd);
     updateTemperature(sensorData->Temp);
+}
+
+void DisplayControl::updateAQI(uint16_t value)
+{
+    char text[20];
+    snprintf(text, sizeof(text), "%d AQI", value);
+    lv_label_set_text(m_labelAQI, text);
+    animateArc(m_gaugeAQI, max((int)value, 10));
 }
 
 void DisplayControl::updateVOC(uint16_t value)

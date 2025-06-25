@@ -32,11 +32,6 @@ void SensorControl::init()
 
     m_humSensor = m_ahtSensor.getHumiditySensor();
     m_humSensor->printSensorDetails();
-
-    // If you have a baseline measurement from before you can assign it to start, to 'self-calibrate'
-    #ifndef BASELINE_TESTING
-        //m_sgpSensor.setIAQBaseline(0x9021, 0x94E7);  // Will vary for each sensor!
-    #endif
 }
 
 
@@ -65,7 +60,6 @@ void SensorControl::readSensorData(SensorData* sensorData)
             sensorData->AQI = m_ensSensor.getAQI500();
             sensorData->TVOC = m_ensSensor.getTVOC();
             sensorData->eCO2 = m_ensSensor.geteCO2();
-            Serial.println("Measure success");
         }
         else
         {
@@ -76,40 +70,13 @@ void SensorControl::readSensorData(SensorData* sensorData)
     sensorData->IsUpdated = true;
 }
 
-void SensorControl::printSensorStats(bool all)
+void SensorControl::printSensorStats(SensorData* sensorData)
 {
-    if (!m_ensSensor.measure())
-    {
-        Serial.println("Measurement failed");
-        return;
-    }
-
-    if (all)
-    {
-        Serial.print("AQI500 "); Serial.print(m_ensSensor.getAQI500()); Serial.println();
-        Serial.print("TVOC "); Serial.print(m_ensSensor.getTVOC()); Serial.println(" ppb");
-        Serial.print("eCO2 "); Serial.print(m_ensSensor.geteCO2()); Serial.println(" ppm");
-    }
-
-    #ifdef BASELINE_TESTING
-        delay(1000);
-        m_counter++;
-        Serial.print(".");
-        if (m_counter == 30)
-        {
-            Serial.println();
-            m_counter = 0;
-
-            uint16_t TVOC_base, eCO2_base;
-            if (!m_sgpSensor.getIAQBaseline(&eCO2_base, &TVOC_base)) 
-            {
-                Serial.println("Failed to get baseline readings");
-                return;
-            }
-            Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
-            Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
-        }
-    #endif 
+    Serial.print("Temperature "); Serial.print(sensorData->Temp); Serial.println(" °C");
+    Serial.print("Humidity "); Serial.print(sensorData->Hmd); Serial.println(" %RH");
+    Serial.print("AQI500 "); Serial.print(sensorData->AQI); Serial.println();
+    Serial.print("TVOC "); Serial.print(sensorData->TVOC); Serial.println(" ppb");
+    Serial.print("eCO2 "); Serial.print(sensorData->eCO2); Serial.println(" ppm");
 }
 
 
