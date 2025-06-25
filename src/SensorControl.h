@@ -11,7 +11,7 @@ class SensorControl
 	private:
         Adafruit_SGP30 m_sgpSensor;
         Adafruit_SHT31 m_shtSensor = Adafruit_SHT31(&Wire1);
-        float m_offsetTemp = -2.6;
+        float m_offsetTemp = -4.9;
         float m_offsetHum = 3.0;
         uint32_t m_counter;
 

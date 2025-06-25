@@ -8,6 +8,8 @@ SensorControl::SensorControl()
 
 void SensorControl::init()
 {
+    Wire1.begin();
+    Wire1.setClock(400000);
     if (!m_shtSensor.begin())
     {
         Serial.println("SHT3X-DIS Sensor not found :(");
@@ -25,12 +27,6 @@ void SensorControl::init()
     Serial.print(m_sgpSensor.serialnumber[0], HEX);
     Serial.print(m_sgpSensor.serialnumber[1], HEX);
     Serial.println(m_sgpSensor.serialnumber[2], HEX);
-
-    if (!m_sgpSensor.IAQinit()) 
-    {
-        Serial.println("SGP30 IAQinit failed");
-    }
-    delay(15000);
 
     // If you have a baseline measurement from before you can assign it to start, to 'self-calibrate'
     #ifndef BASELINE_TESTING
@@ -55,7 +51,7 @@ uint32_t SensorControl::getAbsoluteHumidity(float temperature, float humidity)
 void SensorControl::readSensorData(SensorData* sensorData)
 {
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
-    Serial.println(m_shtSensor.readStatus());
+    //Serial.println(m_shtSensor.readStatus());
     sensorData->Temp = m_shtSensor.readTemperature()+m_offsetTemp; // [°C]
     sensorData->Hmd = m_shtSensor.readHumidity()+m_offsetHum; // [%RH]
     m_sgpSensor.setHumidity(getAbsoluteHumidity(sensorData->Temp, sensorData->Hmd));
@@ -64,8 +60,8 @@ void SensorControl::readSensorData(SensorData* sensorData)
     {
         sensorData->TVOC = m_sgpSensor.TVOC;
         sensorData->eCO2 = m_sgpSensor.eCO2;
-        Serial.print("TVOC: ");Serial.println(m_sgpSensor.TVOC);
-        Serial.print("eCO2: ");Serial.println(m_sgpSensor.eCO2);
+        //Serial.print("TVOC: ");Serial.println(m_sgpSensor.TVOC);
+        //Serial.print("eCO2: ");Serial.println(m_sgpSensor.eCO2);
     }
     else
     {
@@ -76,8 +72,8 @@ void SensorControl::readSensorData(SensorData* sensorData)
     {
         sensorData->rawH2 = m_sgpSensor.rawH2;
         sensorData->rawEthanol = m_sgpSensor.rawEthanol;
-        Serial.print("Raw H2: ");Serial.println(m_sgpSensor.rawH2);
-        Serial.print("Raw Ethanol: ");Serial.println(m_sgpSensor.rawEthanol);
+        //Serial.print("Raw H2: ");Serial.println(m_sgpSensor.rawH2);
+        //Serial.print("Raw Ethanol: ");Serial.println(m_sgpSensor.rawEthanol);
     }
     else
     {
