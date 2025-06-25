@@ -9,34 +9,34 @@ SensorControl::SensorControl()
 void SensorControl::init()
 {
     Wire1.begin();
-    Wire1.setClock(400000);
-    if (!m_shtSensor.begin())
+
+    if (!m_ahtSensor.begin(&Wire1))
     {
-        Serial.println("SHT3X-DIS Sensor not found :(");
+        Serial.println("AHT21 Sensor not found :(");
         while (1);
     }
-    Serial.print("Found SHT3X-DIS serial #");
+    Serial.println("Found AHT21");
 
-    if (!m_sgpSensor.begin(&Wire1))
+    if (!m_ensSensor.begin())
     {
-        Serial.println("SGP30 Sensor not found :(");
+        Serial.println("ENS160 Sensor not found :(");
         digitalWrite (BUILTIN_LED, HIGH);	// turn on the LED
         while (1);
     }
-    Serial.print("Found SGP30 serial #");
-    Serial.print(m_sgpSensor.serialnumber[0], HEX);
-    Serial.print(m_sgpSensor.serialnumber[1], HEX);
-    Serial.println(m_sgpSensor.serialnumber[2], HEX);
+    Serial.print("Found ENS160 and ");
+    Serial.println(m_ensSensor.available() ? "ready." : "failed!");
+    m_ensSensor.setMode(ENS160_OPMODE_STD);
+
+    m_tempSensor = m_ahtSensor.getTemperatureSensor();
+    m_tempSensor->printSensorDetails();
+
+    m_humSensor = m_ahtSensor.getHumiditySensor();
+    m_humSensor->printSensorDetails();
 
     // If you have a baseline measurement from before you can assign it to start, to 'self-calibrate'
     #ifndef BASELINE_TESTING
-        m_sgpSensor.setIAQBaseline(0x9021, 0x94E7);  // Will vary for each sensor!
+        //m_sgpSensor.setIAQBaseline(0x9021, 0x94E7);  // Will vary for each sensor!
     #endif
-    //****Baseline values: eCO2: 0x8DCE & TVOC: 0x9026
-    //****Baseline values: eCO2: 0x8C2A & TVOC: 0x8FAD
-    //****Baseline values: eCO2: 0x9200 & TVOC: 0x9583
-    //****Baseline values: eCO2: 0x9021 & TVOC: 0x94E7
-
 }
 
 
@@ -51,33 +51,26 @@ uint32_t SensorControl::getAbsoluteHumidity(float temperature, float humidity)
 void SensorControl::readSensorData(SensorData* sensorData)
 {
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
-    //Serial.println(m_shtSensor.readStatus());
-    sensorData->Temp = m_shtSensor.readTemperature()+m_offsetTemp; // [°C]
-    sensorData->Hmd = m_shtSensor.readHumidity()+m_offsetHum; // [%RH]
-    m_sgpSensor.setHumidity(getAbsoluteHumidity(sensorData->Temp, sensorData->Hmd));
+    //Serial.println(m_ahtSensor.getStatus());
+    sensorData->Temp = getTemperature(); // [°C]
+    sensorData->Hmd = getHumidity(); // [%RH]
+    //m_sgpSensor.setHumidity(getAbsoluteHumidity(sensorData->Temp, sensorData->Hmd));
 
-    if (m_sgpSensor.IAQmeasure())
+    if (m_ensSensor.available())
     {
-        sensorData->TVOC = m_sgpSensor.TVOC;
-        sensorData->eCO2 = m_sgpSensor.eCO2;
-        //Serial.print("TVOC: ");Serial.println(m_sgpSensor.TVOC);
-        //Serial.print("eCO2: ");Serial.println(m_sgpSensor.eCO2);
-    }
-    else
-    {
-        Serial.println("Measurement failed");
-    }
-    
-    if (m_sgpSensor.IAQmeasureRaw())
-    {
-        sensorData->rawH2 = m_sgpSensor.rawH2;
-        sensorData->rawEthanol = m_sgpSensor.rawEthanol;
-        //Serial.print("Raw H2: ");Serial.println(m_sgpSensor.rawH2);
-        //Serial.print("Raw Ethanol: ");Serial.println(m_sgpSensor.rawEthanol);
-    }
-    else
-    {
-        Serial.println("Raw Measurement failed");
+        m_ensSensor.set_envdata(sensorData->Temp, sensorData->Hmd);
+
+        if (m_ensSensor.measure())
+        {
+            sensorData->AQI = m_ensSensor.getAQI500();
+            sensorData->TVOC = m_ensSensor.getTVOC();
+            sensorData->eCO2 = m_ensSensor.geteCO2();
+            Serial.println("Measure success");
+        }
+        else
+        {
+            Serial.println("Measurement failed");
+        }
     }
 
     sensorData->IsUpdated = true;
@@ -85,7 +78,7 @@ void SensorControl::readSensorData(SensorData* sensorData)
 
 void SensorControl::printSensorStats(bool all)
 {
-    if (!m_sgpSensor.IAQmeasure())
+    if (!m_ensSensor.measure())
     {
         Serial.println("Measurement failed");
         return;
@@ -93,21 +86,10 @@ void SensorControl::printSensorStats(bool all)
 
     if (all)
     {
-        Serial.print("TVOC "); Serial.print(m_sgpSensor.TVOC); Serial.print(" ppb\t");
-        Serial.print("eCO2 "); Serial.print(m_sgpSensor.eCO2); Serial.println(" ppm");
+        Serial.print("AQI500 "); Serial.print(m_ensSensor.getAQI500()); Serial.println();
+        Serial.print("TVOC "); Serial.print(m_ensSensor.getTVOC()); Serial.println(" ppb");
+        Serial.print("eCO2 "); Serial.print(m_ensSensor.geteCO2()); Serial.println(" ppm");
     }
-
-    if (!m_sgpSensor.IAQmeasureRaw())
-    {
-        Serial.println("Raw Measurement failed");
-        return;
-    }
-  
-    if (all)
-    {
-        Serial.print("Raw H2 "); Serial.print(m_sgpSensor.rawH2); Serial.print(" \t");
-        Serial.print("Raw Ethanol "); Serial.print(m_sgpSensor.rawEthanol); Serial.println("");
-    }    
 
     #ifdef BASELINE_TESTING
         delay(1000);
@@ -128,4 +110,19 @@ void SensorControl::printSensorStats(bool all)
             Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
         }
     #endif 
+}
+
+
+float SensorControl::getTemperature()
+{
+    sensors_event_t temp;
+    m_tempSensor->getEvent(&temp);
+    return temp.temperature+m_offsetTemp;
+}
+
+float SensorControl::getHumidity()
+{
+    sensors_event_t humidity;
+    m_humSensor->getEvent(&humidity);
+    return humidity.relative_humidity+m_offsetHum;
 }

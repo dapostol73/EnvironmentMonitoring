@@ -27,7 +27,7 @@ void setup()
     Serial.println("Sensor Control Init");    
     sensorControl.init();
     Serial.println("Init Complete"); 
-    delay(15000);
+    delay(1000);
 }
 
 void loop()
@@ -49,6 +49,6 @@ void loop()
         sensorData.IsUpdated = false;
     }
 
-    sensorControl.printSensorStats(true);
+    //sensorControl.printSensorStats(true);
     lv_timer_handler(); /* let the GUI do its work */
 }
