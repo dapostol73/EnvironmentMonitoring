@@ -55,11 +55,9 @@ void DisplayControl::init(uint16_t rotation)
     setupLvglDisplay();
     setupLvglTouch();
     setupLvglScreen();
-    //m_gaugeVOC = setupLvglGauge(m_screenWidth, 24, 0, 100, m_colorAmber);
-    //m_gaugeHumidity = setupLvglGauge(m_screenWidth-48, 24, 0, 100, m_colorAqua);
     m_gaugeCO2 = createLvglGaugeSimple(m_screenWidth, m_arcWidth, 0, 10000, m_colorYellow, m_colorGrayDark);
     m_gaugeVOC = createLvglGaugeSimple(m_screenWidth-2*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 5500, m_colorAmber, m_colorGrayExtraDark);
-    m_gaugeAQI = createLvglGaugeSimple(m_screenWidth-4*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 500, m_colorLime, m_colorGrayDark);
+    m_gaugeAQI = createLvglGaugeSimple(m_screenWidth-4*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 5, m_colorLime, m_colorGrayDark);
     m_gaugeTemperature = createLvglGaugeSimple(m_screenWidth-6*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 50, m_colorRed, m_colorGrayExtraDark);
     m_gaugeHumidity = createLvglGaugeSimple(m_screenWidth-8*(m_arcWidth+m_arcMargin), m_arcWidth, 0, 100, m_colorAqua, m_colorGrayDark);
     m_labelCO2 = createLvglLabel(0, 96, "NA CO2", m_colorYellow);
@@ -86,7 +84,7 @@ void DisplayControl::updateAQI(uint16_t value)
     char text[20];
     snprintf(text, sizeof(text), "%d AQI", value);
     lv_label_set_text(m_labelAQI, text);
-    animateArc(m_gaugeAQI, max((int)value, 10));
+    animateArc(m_gaugeAQI, max((int)value, 1));
 }
 
 void DisplayControl::updateVOC(uint16_t value)

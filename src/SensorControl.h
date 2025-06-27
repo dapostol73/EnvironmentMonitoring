@@ -13,7 +13,7 @@ class SensorControl
         ScioSense_ENS160 m_ensSensor = ScioSense_ENS160(&Wire1, ENS160_I2CADDR_1);
         Adafruit_Sensor *m_tempSensor;
         Adafruit_Sensor *m_humSensor;
-        float m_offsetTemp = -7.0;
+        float m_offsetTemp = -11.0;
         float m_offsetHum = 10.0;
         uint32_t m_counter;
 

@@ -1,3 +1,10 @@
+//*****************************************************************************
+// Copyright (c) 2014 A12 Studios Inc. and Demetrius Apostolopoulos.
+// All rights reserved.
+//
+// If Serial Logging support is required add this build flag to platformio.ini
+//   build_flags = -D SERIAL_LOGGING
+//*****************************************************************************
 
 #include <Arduino.h>
 
@@ -5,12 +12,30 @@
 #include "SensorControl.h"
 #include "SensorData.h"
 
+#ifndef SERIAL_LOGGING
+// disable Serial output
+#define Serial KillDefaultSerial
+static class {
+public:
+    void begin(...) {}
+    void print(...) {}
+    void println(...) {}
+} Serial;
+#endif
+
 long timeSinceLastRead = LONG_MIN;
 const uint16_t SENSOR_INTERVAL_SECS = 2; // Sensor query every X seconds
 
 DisplayControl displayControl;
 SensorControl sensorControl;
 SensorData sensorData;
+
+void logPrint(const char * info, bool endLine = true)
+{
+    #ifdef SERIAL_LOGGING
+    endLine ? Serial.println(info) : Serial.print(info);
+    #endif
+}
 
 void blinkLED(uint8_t times, uint16_t freq)
 {
@@ -29,14 +54,14 @@ void setup()
     delay(1000);
     while (!Serial) { delay(10); } // Wait for serial console to open!
 
-    Serial.println("Environment Monitoring Init");
+    logPrint("Environment Monitoring Init");
     // put your setup code here, to run once:
     pinMode(BUILTIN_LED, OUTPUT);
-    Serial.println("Display Control Init");
+    logPrint("Display Control Init");
     displayControl.init(0);
-    Serial.println("Sensor Control Init");    
+    logPrint("Sensor Control Init");    
     sensorControl.init();
-    Serial.println("Init Complete"); 
+    logPrint("Init Complete"); 
     blinkLED(2, 250);
 }
 
@@ -44,7 +69,7 @@ void loop()
 {
     if (millis() - timeSinceLastRead > (1000L*SENSOR_INTERVAL_SECS))
     {
-        Serial.println("Updating sensor data");
+        logPrint("Updating sensor data");
         sensorControl.readSensorData(&sensorData);
         timeSinceLastRead = millis();
     }
