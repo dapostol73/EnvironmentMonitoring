@@ -4,18 +4,21 @@
 #include "WiFiConnection.h"
 #include "ThingSpeakInfo.h"
 
-struct ApplicationSettings
+namespace A12Studios
 {
-    WiFiConnection WifiSettings;
-    ThingSpeakInfo ThingSpeakSettings;
-
-    ApplicationSettings() = default;
-
-    ApplicationSettings(WiFiConnection wifiSettings, ThingSpeakInfo thingSpeakSettings)
+    struct ApplicationSettings
     {
-        WifiSettings = wifiSettings;
-        ThingSpeakSettings = thingSpeakSettings;
-    }
-};
+        WiFiConnection WifiSettings;
+        ThingSpeakInfo ThingSpeakSettings;
+
+        ApplicationSettings() = default;
+
+        ApplicationSettings(WiFiConnection wifiSettings, ThingSpeakInfo thingSpeakSettings)
+        {
+            WifiSettings = wifiSettings;
+            ThingSpeakSettings = thingSpeakSettings;
+        }
+    };
+}
 
 #endif

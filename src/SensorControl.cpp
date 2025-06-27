@@ -1,12 +1,12 @@
 #include "SensorControl.h"
 //#define BASELINE_TESTING
 
-SensorControl::SensorControl()
+A12Studios::SensorControl::SensorControl::SensorControl()
 {
 }
 
 
-void SensorControl::init()
+void A12Studios::SensorControl::init()
 {
     Wire1.begin();
 
@@ -35,7 +35,7 @@ void SensorControl::init()
 }
 
 
-uint32_t SensorControl::getAbsoluteHumidity(float temperature, float humidity)
+uint32_t A12Studios::SensorControl::getAbsoluteHumidity(float temperature, float humidity)
 {
     // approximation formula from Sensirion SGP30 Driver Integration chapter 3.15
     const float absoluteHumidity = 216.7f * ((humidity / 100.0f) * 6.112f * exp((17.62f * temperature) / (243.12f + temperature)) / (273.15f + temperature)); // [g/m^3]
@@ -43,7 +43,7 @@ uint32_t SensorControl::getAbsoluteHumidity(float temperature, float humidity)
     return absoluteHumidityScaled;
 }
 
-void SensorControl::readSensorData(SensorData* sensorData)
+void A12Studios::SensorControl::readSensorData(SensorData* sensorData)
 {
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
     //Serial.println(m_ahtSensor.getStatus());
@@ -70,7 +70,7 @@ void SensorControl::readSensorData(SensorData* sensorData)
     sensorData->IsUpdated = true;
 }
 
-void SensorControl::printSensorStats(SensorData* sensorData)
+void A12Studios::SensorControl::printSensorStats(SensorData* sensorData)
 {
     Serial.print("Temperature "); Serial.print(sensorData->Temp); Serial.println(" °C");
     Serial.print("Humidity "); Serial.print(sensorData->Hmd); Serial.println(" %RH");
@@ -80,14 +80,14 @@ void SensorControl::printSensorStats(SensorData* sensorData)
 }
 
 
-float SensorControl::getTemperature()
+float A12Studios::SensorControl::getTemperature()
 {
     sensors_event_t temp;
     m_tempSensor->getEvent(&temp);
     return temp.temperature+m_offsetTemp;
 }
 
-float SensorControl::getHumidity()
+float A12Studios::SensorControl::getHumidity()
 {
     sensors_event_t humidity;
     m_humSensor->getEvent(&humidity);

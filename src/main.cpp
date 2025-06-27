@@ -11,6 +11,9 @@
 #include "DisplayControl.h"
 #include "SensorControl.h"
 #include "SensorData.h"
+#include "NetworkManager.h"
+
+using namespace A12Studios;
 
 #ifndef SERIAL_LOGGING
 // disable Serial output
@@ -29,6 +32,7 @@ const uint16_t SENSOR_INTERVAL_SECS = 2; // Sensor query every X seconds
 DisplayControl displayControl;
 SensorControl sensorControl;
 SensorData sensorData;
+A12Studios::NetworkManager networkManager;
 
 void logPrint(const char * info, bool endLine = true)
 {

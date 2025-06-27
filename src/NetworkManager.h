@@ -19,4 +19,5 @@ namespace A12Studios
             String getLocalIP();
     };
 }
+
 #endif

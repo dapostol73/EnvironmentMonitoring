@@ -39,12 +39,12 @@ void ArcCallback(void *arc, int32_t value)
     lv_arc_set_value((lv_obj_t*)arc, value);
 }
 
-DisplayControl::DisplayControl()
+A12Studios::DisplayControl::DisplayControl()
 {
 }
 
 
-void DisplayControl::init(uint16_t rotation)
+void A12Studios::DisplayControl::init(uint16_t rotation)
 {
     DisplayGFX->begin();
     m_screenWidth = DisplayGFX->width();
@@ -70,7 +70,7 @@ void DisplayControl::init(uint16_t rotation)
     lv_scr_load(m_screenMain);
 }
 
-void DisplayControl::update(SensorData * sensorData)
+void A12Studios::DisplayControl::update(SensorData * sensorData)
 {
     updateAQI(sensorData->AQI);
     updateVOC(sensorData->TVOC);
@@ -79,7 +79,7 @@ void DisplayControl::update(SensorData * sensorData)
     updateTemperature(sensorData->Temp);
 }
 
-void DisplayControl::updateAQI(uint16_t value)
+void A12Studios::DisplayControl::updateAQI(uint16_t value)
 {
     char text[20];
     snprintf(text, sizeof(text), "%d AQI", value);
@@ -87,7 +87,7 @@ void DisplayControl::updateAQI(uint16_t value)
     animateArc(m_gaugeAQI, max((int)value, 1));
 }
 
-void DisplayControl::updateVOC(uint16_t value)
+void A12Studios::DisplayControl::updateVOC(uint16_t value)
 {
     char text[20];
     snprintf(text, sizeof(text), "%d VOC", value);
@@ -96,7 +96,7 @@ void DisplayControl::updateVOC(uint16_t value)
 }
 
 
-void DisplayControl::updateCO2(uint16_t value)
+void A12Studios::DisplayControl::updateCO2(uint16_t value)
 {
     char text[20];
     snprintf(text, sizeof(text), "%d CO2", value);
@@ -104,7 +104,7 @@ void DisplayControl::updateCO2(uint16_t value)
     animateArc(m_gaugeCO2, max((int)value, 100));
 }
 
-void DisplayControl::updateHumidity(float value)
+void A12Studios::DisplayControl::updateHumidity(float value)
 {
     char text[20];
     snprintf(text, sizeof(text), "%.1f RH", value);
@@ -112,7 +112,7 @@ void DisplayControl::updateHumidity(float value)
     animateArc(m_gaugeHumidity, max(value, 1.0f));
 }
 
-void DisplayControl::updateTemperature(float value)
+void A12Studios::DisplayControl::updateTemperature(float value)
 {
     char text[20];
     snprintf(text, sizeof(text), "%.1f C", value);
@@ -120,7 +120,7 @@ void DisplayControl::updateTemperature(float value)
     animateArc(m_gaugeTemperature, max(value, 1.0f));
 }
 
-void DisplayControl::animateArc(lv_obj_t * lv_arc, uint32_t value)
+void A12Studios::DisplayControl::animateArc(lv_obj_t * lv_arc, uint32_t value)
 {
     lv_anim_t a;
     lv_anim_init(&a);
@@ -132,7 +132,7 @@ void DisplayControl::animateArc(lv_obj_t * lv_arc, uint32_t value)
     lv_anim_start(&a);
 }
 
-void DisplayControl::setupLvglDisplay()
+void A12Studios::DisplayControl::setupLvglDisplay()
 {
     lv_init();
     lv_tick_set_cb(millis);
@@ -142,7 +142,7 @@ void DisplayControl::setupLvglDisplay()
     lv_display_set_buffers(disp, m_drawBuffer, NULL, sizeof(m_drawBuffer), LV_DISPLAY_RENDER_MODE_PARTIAL);
 }
 
-void DisplayControl::setupLvglTouch()
+void A12Studios::DisplayControl::setupLvglTouch()
 {
     /*Initialize the (dummy) input device driver*/
     lv_indev_t *indev = lv_indev_create();
@@ -150,7 +150,7 @@ void DisplayControl::setupLvglTouch()
     lv_indev_set_read_cb(indev, TouchRead);
 }
 
-void DisplayControl::setupLvglScreen()
+void A12Studios::DisplayControl::setupLvglScreen()
 {
     m_screenBoot = lv_obj_create(NULL);
     m_screenMain = lv_obj_create(NULL);
@@ -162,7 +162,7 @@ void DisplayControl::setupLvglScreen()
 }
 
 
-lv_obj_t* DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color)
+lv_obj_t* A12Studios::DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * text, lv_color_t color)
 {
     lv_obj_t *label = lv_label_create(m_screenMain);
     lv_label_set_text(label, text);
@@ -173,7 +173,7 @@ lv_obj_t* DisplayControl::createLvglLabel(int16_t x, int16_t y, const char * tex
     return label;
 }
 
-lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color)
+lv_obj_t* A12Studios::DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t color)
 {
     lv_obj_t *mainArc = lv_arc_create(m_screenMain);
     uint16_t outsideWidth = width*0.75;
@@ -199,7 +199,7 @@ lv_obj_t* DisplayControl::createLvglGauge(uint16_t size, uint16_t width, uint16_
     return mainArc;
 }
 
-lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t fgColor, lv_color_t bgColor)
+lv_obj_t* A12Studios::DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, uint16_t minValue, uint16_t maxValue, lv_color_t fgColor, lv_color_t bgColor)
 {
     lv_obj_t *simpleArc = lv_arc_create(m_screenMain);
     lv_obj_set_size(simpleArc, size, size);
@@ -216,7 +216,7 @@ lv_obj_t* DisplayControl::createLvglGaugeSimple(uint16_t size, uint16_t width, u
     return simpleArc;
 }
 
-void DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color)
+void A12Studios::DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float start, float radius, lv_color_t color)
 {
     lv_obj_t *lineArc = lv_arc_create(m_screenMain);
     lv_obj_set_size(lineArc, size, size);
@@ -230,7 +230,7 @@ void DisplayControl::createLvglArcSimple(uint16_t size, uint16_t width, float st
     lv_obj_remove_style(lineArc, NULL, LV_PART_KNOB);
 }
 
-void DisplayControl::createLvglArcLines(uint16_t size, uint16_t width, float start, float radius, uint16_t lines, lv_color_t color)
+void A12Studios::DisplayControl::createLvglArcLines(uint16_t size, uint16_t width, float start, float radius, uint16_t lines, lv_color_t color)
 {
     float segment = radius/lines;
     for (uint8_t i = 0; i <= lines; i++)
