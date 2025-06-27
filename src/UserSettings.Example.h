@@ -1,13 +1,16 @@
+//*****************************************************************************
+// Rename to UserSettings.h and modify for your local settings.
+// Add as many WiFi and ThingSpeak configs as needed.
+//*****************************************************************************
+
 #ifndef _USER_SETTINGS_H_
 #define _USER_SETTINGS_H_
 
 #include "ApplicationSettings.h"
 
 ApplicationSettings Home(WiFiConnection("homessid", "homepw123"),
-                         OpenWeatherInfo("homeAppID", "homeLocationID"),
                          ThingSpeakInfo("homeWriteAPIKey", "homeReadAPIKey", 1234567));
 ApplicationSettings Office(WiFiConnection("officessid", "officepw123"),
-                           OpenWeatherInfo("officeAppID", "officeLocationID"),
                            ThingSpeakInfo("officeWriteAPIKey", "officeReadAPIKey", 1234567));
 
 ApplicationSettings AppSettings[] = { Home, Office };
