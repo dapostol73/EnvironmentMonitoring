@@ -135,10 +135,28 @@ bool A12Studios::NetworkManager::connectWiFi(WiFiConnection wiFiConnection, uint
 	return WiFi.isConnected();
 }
 
-String A12Studios::NetworkManager::getLocalIP()
+void A12Studios::NetworkManager::printStats()
 {
+	#ifdef SERIAL_LOGGING
+	// get your MAC address
+	byte mac[6];
+	WiFi.macAddress(mac);
 	IPAddress ip = WiFi.localIP();
-	char ipInfo[20] = "";
-	sprintf(ipInfo, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
-	return ipInfo;
+	
+	// SSID
+	char ssidInfo[34] = "";
+	sprintf(ssidInfo, "WiFi SSID: %s", WiFi.SSID().c_str());
+
+	// MAC address
+	char macInfo[34] = "";
+	sprintf(macInfo, "MAC address: %02X:%02X:%02X:%02X:%02X:%02X", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+
+	// IP address
+	char ipInfo[34] = "";
+	sprintf(ipInfo, "IP address: %u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+    
+	Serial.println(ssidInfo);
+	Serial.println(ipInfo);	
+	Serial.println(macInfo);
+	#endif
 }

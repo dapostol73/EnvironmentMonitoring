@@ -27,8 +27,8 @@ namespace A12Studios
             SensorControl();
             void init();
             uint32_t getAbsoluteHumidity(float temperature, float humidity);
-            void readSensorData(SensorData* sensorData);
-            void printSensorStats(SensorData* sensorData);
+            void readData(SensorData* sensorData);
+            void printStats(SensorData* sensorData);
     };
 }
 

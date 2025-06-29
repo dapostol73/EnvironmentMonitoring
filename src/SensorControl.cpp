@@ -43,7 +43,7 @@ uint32_t A12Studios::SensorControl::getAbsoluteHumidity(float temperature, float
     return absoluteHumidityScaled;
 }
 
-void A12Studios::SensorControl::readSensorData(SensorData* sensorData)
+void A12Studios::SensorControl::readData(SensorData* sensorData)
 {
     // If you have a temperature / humidity sensor, you can set the absolute humidity to enable the humditiy compensation for the air quality signals
     //Serial.println(m_ahtSensor.getStatus());
@@ -70,7 +70,7 @@ void A12Studios::SensorControl::readSensorData(SensorData* sensorData)
     sensorData->IsUpdated = true;
 }
 
-void A12Studios::SensorControl::printSensorStats(SensorData* sensorData)
+void A12Studios::SensorControl::printStats(SensorData* sensorData)
 {
     Serial.print("Temperature "); Serial.print(sensorData->Temp); Serial.println(" °C");
     Serial.print("Humidity "); Serial.print(sensorData->Hmd); Serial.println(" %RH");
