@@ -30,6 +30,7 @@ public:
 DisplayControl displayControl;
 SensorControl sensorControl;
 SensorData sensorData;
+SensorDataAverage sensorDataAverage;
 ApplicationSettings appSettings;
 A12Studios::NetworkManager networkManager;
 
@@ -65,7 +66,40 @@ void initNetwork()
     networkManager.printStats();
 }
 
-void uploadSensorData(ThingSpeakInfo* thingSpeakInfo, SensorData* sensorData)
+void addSensorDataAverage(SensorData* sensorData, SensorDataAverage* sensorDataAverage)
+{
+    logPrint("Adding to sensor data averages.");
+    sensorDataAverage->Temp += sensorData->Temp;
+    sensorDataAverage->Hmd += sensorData->Hmd;
+    sensorDataAverage->AQI += sensorData->AQI;
+    sensorDataAverage->TVOC += sensorData->TVOC;
+    sensorDataAverage->eCO2 += sensorData->eCO2;
+    sensorDataAverage->Samples++;
+}
+
+void calcSensorDataAverage(SensorDataAverage* sensorDataAverage)
+{
+    logPrint("Calculating sensor data averages.");
+    sensorDataAverage->Temp /= sensorDataAverage->Samples;
+    sensorDataAverage->Hmd /= sensorDataAverage->Samples;
+    sensorDataAverage->AQI /= sensorDataAverage->Samples;
+    sensorDataAverage->TVOC /= sensorDataAverage->Samples;
+    sensorDataAverage->eCO2 /= sensorDataAverage->Samples;
+    sensorDataAverage->Samples = 1;
+}
+
+void resetSensorDataAverage(SensorDataAverage* sensorDataAverage)
+{
+    logPrint("Reseting sensor data averages.");
+    sensorDataAverage->Temp = 0.0;
+    sensorDataAverage->Hmd = 0.0;
+    sensorDataAverage->AQI = 0;
+    sensorDataAverage->TVOC = 0;
+    sensorDataAverage->eCO2 = 0;
+    sensorDataAverage->Samples = 0;    
+}
+
+void uploadSensorData(ThingSpeakInfo* thingSpeakInfo, SensorDataAverage* sensorDataAverage)
 {
 	if(!networkManager.NetClient.connect(thingSpeakInfo->Host, thingSpeakInfo->Port))
 	{
@@ -75,13 +109,14 @@ void uploadSensorData(ThingSpeakInfo* thingSpeakInfo, SensorData* sensorData)
 		return;
 	}
 
+    calcSensorDataAverage(sensorDataAverage);
 	// Three values(field1 field2 field3 field4) have been set in thingspeak.com 
 	networkManager.NetClient.print(String("GET ") + "/update?api_key=" + thingSpeakInfo->APIKeyWrite
-				+ "&field1=" + sensorData->AQI
-				+ "&field2=" + sensorData->TVOC
-				+ "&field3=" + sensorData->eCO2
-				+ "&field4=" + sensorData->Temp
-				+ "&field5=" + sensorData->Hmd
+				+ "&field1=" + sensorDataAverage->AQI
+				+ "&field2=" + sensorDataAverage->TVOC
+				+ "&field3=" + sensorDataAverage->eCO2
+				+ "&field4=" + sensorDataAverage->Temp
+				+ "&field5=" + sensorDataAverage->Hmd
 				+ " HTTP/1.1\r\n" 
 				+ "Host: " + thingSpeakInfo->Host + "\r\n" 
 				+ "Connection: close\r\n\r\n");
@@ -94,6 +129,7 @@ void uploadSensorData(ThingSpeakInfo* thingSpeakInfo, SensorData* sensorData)
 		#endif
 	}
 
+    resetSensorDataAverage(sensorDataAverage);
 	#ifdef SERIAL_LOGGING
 	Serial.println("Updated ThingSpeak");
 	#endif
@@ -124,6 +160,7 @@ void loop()
     {
         logPrint("Updating sensor data");
         sensorControl.readData(&sensorData);
+        addSensorDataAverage(&sensorData, &sensorDataAverage);
         timeSinceLastRead = millis();
     }
 
@@ -139,7 +176,7 @@ void loop()
     if (millis() - timeSinceLastUpload > (1000L*UPLOAD_INTERVAL_SECS))
     {
         logPrint("Upload sensor data");
-        uploadSensorData(&appSettings.ThingSpeakSettings, &sensorData);
+        uploadSensorData(&appSettings.ThingSpeakSettings, &sensorDataAverage);
         timeSinceLastUpload = millis();
     }
 }
